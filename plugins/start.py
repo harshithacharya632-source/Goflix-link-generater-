@@ -12,26 +12,35 @@ from database.users_chats_db import db
 from utils import temp, get_shortlink
 
 
-@Client.on_message(filters.command("start") & filters.incoming)
+@Client.on_message(filters.command("start"))
 async def start(client, message):
-    if not await db.is_user_exist(message.from_user.id):
-        await db.add_user(message.from_user.id, message.from_user.first_name)
+    user = message.from_user
+    if not user:
+        return
+
+    if not await db.is_user_exist(user.id):
+        await db.add_user(user.id, user.first_name or "User")
         await client.send_message(
             LOG_CHANNEL,
-            script.LOG_TEXT_P.format(message.from_user.id, message.from_user.mention)
+            script.LOG_TEXT_P.format(user.id, user.mention)
         )
+
     rm = InlineKeyboardMarkup(
         [[
             InlineKeyboardButton("✨ Update Channel", url="https://t.me/trendi_Backup")
         ]]
     )
-    await client.send_message(
-        chat_id=message.from_user.id,
-        text=script.START_TXT.format(message.from_user.mention, temp.U_NAME, temp.B_NAME),
+
+    await message.reply_text(
+        text=script.START_TXT.format(
+            user.mention,
+            temp.U_NAME,
+            temp.B_NAME
+        ),
         reply_markup=rm,
-        parse_mode=enums.ParseMode.HTML
+        parse_mode=enums.ParseMode.HTML,
+        disable_web_page_preview=True
     )
-    return
 
 
 @Client.on_message(filters.private & (filters.document | filters.video))

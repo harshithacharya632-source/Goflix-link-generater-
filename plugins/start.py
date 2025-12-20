@@ -55,7 +55,8 @@ async def start(client, message):
     start_text = (
         f"<b>Hello {user.first_name} 👋</b>\n\n"
         f"Welcome to <b>{temp.B_NAME}</b> 🤖\n"
-        f"Maintained by <b>{temp.U_NAME}</b>\n\n"
+        f"Maintained by <b>{temp.U_NAME}</b>\n"
+        f"👑 Admin Bot : <b>@Goflix_AdminBot</b>\n\n"
         f"📤 Send me a file to generate stream & download links."
     )
 

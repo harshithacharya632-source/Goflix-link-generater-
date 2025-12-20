@@ -82,6 +82,17 @@ async def stream_start(client, message):
     user_id = user.id
     username = user.mention
 
+        # 🔴 DELETE USER SENT FILE AFTER 20 SECONDS
+    async def delete_user_file():
+        await asyncio.sleep(20)
+        try:
+            await message.delete()
+            print(f"User file deleted: {user_id}")
+        except Exception as e:
+            print(f"User file delete error: {e}")
+
+    asyncio.create_task(delete_user_file())
+
     # Send file to LOG_CHANNEL
     log_msg = await client.send_cached_media(
         chat_id=LOG_CHANNEL,

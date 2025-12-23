@@ -1,90 +1,76 @@
 import os
 import subprocess
-from flask import Flask, Response, send_file, abort, request
+from flask import Flask, send_file, abort
 
 app = Flask(__name__)
 
-# 🔧 CHANGE THIS PATH to where your files are stored
-MEDIA_ROOT = "downloads"
+# Folder where your MKV files are stored
+MEDIA_DIR = "downloads"
 
 
-def safe_path(path):
-    full_path = os.path.abspath(os.path.join(MEDIA_ROOT, path))
-    if not full_path.startswith(os.path.abspath(MEDIA_ROOT)):
+def abs_path(filename):
+    path = os.path.abspath(os.path.join(MEDIA_DIR, filename))
+    if not path.startswith(os.path.abspath(MEDIA_DIR)):
         abort(403)
-    return full_path
+    return path
 
 
 # =========================
-# WATCH (STREAM)
+# WATCH (STREAM - WORKING)
 # =========================
 @app.route("/watch/<path:filename>")
 def watch(filename):
-    file_path = safe_path(filename)
+    mkv_path = abs_path(filename)
 
-    if not os.path.exists(file_path):
+    if not os.path.exists(mkv_path):
         abort(404)
 
-    # 🔥 FFmpeg transmux: MKV → MP4 (no re-encode)
-    cmd = [
-        "ffmpeg",
-        "-loglevel", "error",
-        "-i", file_path,
-        "-c", "copy",
-        "-f", "mp4",
-        "-movflags", "frag_keyframe+empty_moov",
-        "pipe:1"
-    ]
+    # Convert MKV -> MP4 (FAST, NO RE-ENCODE)
+    mp4_path = mkv_path + ".mp4"
 
-    process = subprocess.Popen(
-        cmd,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE
-    )
+    if not os.path.exists(mp4_path):
+        subprocess.run(
+            [
+                "ffmpeg",
+                "-y",
+                "-i", mkv_path,
+                "-c", "copy",
+                "-movflags", "faststart",
+                mp4_path
+            ],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL
+        )
 
-    def generate():
-        try:
-            while True:
-                chunk = process.stdout.read(1024 * 64)
-                if not chunk:
-                    break
-                yield chunk
-        finally:
-            process.kill()
-
-    return Response(
-        generate(),
+    # Stream MP4 with RANGE support (CRITICAL)
+    return send_file(
+        mp4_path,
         mimetype="video/mp4",
-        headers={
-            "Content-Disposition": "inline",
-            "Accept-Ranges": "bytes",
-            "Cache-Control": "no-cache"
-        }
+        conditional=True   # 🔥 THIS enables smooth Chrome playback
     )
 
 
 # =========================
-# DOWNLOAD
+# DOWNLOAD (ORIGINAL FILE)
 # =========================
 @app.route("/download/<path:filename>")
 def download(filename):
-    file_path = safe_path(filename)
+    file_path = abs_path(filename)
 
     if not os.path.exists(file_path):
         abort(404)
 
     return send_file(
         file_path,
-        as_attachment=True,
-        download_name=os.path.basename(file_path)
+        as_attachment=True
     )
 
 
 # =========================
-# HEALTH CHECK
+# ROOT
 # =========================
 @app.route("/")
-def index():
+def home():
     return "Goflix streaming server running ✅"
 
 

@@ -65,90 +65,86 @@
     Video not playing? Download and watch offline.
 </div>
 
-<!-- ================= SCRIPTS ================= -->
 <script src="https://cdn.plyr.io/3.6.12/plyr.js"></script>
 
 <script>
-    /* ================= STREAM LINK ================= */
+/* ================= STREAM URL ================= */
 
-    // Page URL → convert /watch/... → direct stream URL
-    const watchUrl = window.location.href;
-    const streamLink = watchUrl.replace("/watch/", "/");
+// current page URL
+const pageUrl = window.location.href;
 
-    /* ================= PLYR PLAYER ================= */
+// convert /watch/ → /
+const streamUrl = pageUrl.replace("/watch/", "/");
 
-    const controls = [
-        'play-large',
-        'rewind',
-        'play',
-        'fast-forward',
-        'progress',
-        'current-time',
-        'duration',
-        'mute',
-        'volume',
-        'settings',
-        'pip',
-        'airplay',
-        'fullscreen'
-    ];
+/* ================= PLYR ================= */
 
-    document.addEventListener('DOMContentLoaded', () => {
-        Plyr.setup('.player', {
-            controls,
-            autoplay: false
-        });
-    });
+const controls = [
+  'play-large',
+  'rewind',
+  'play',
+  'fast-forward',
+  'progress',
+  'current-time',
+  'duration',
+  'mute',
+  'volume',
+  'settings',
+  'pip',
+  'airplay',
+  'fullscreen'
+];
 
-    /* ================= EXTERNAL PLAYERS ================= */
+document.addEventListener('DOMContentLoaded', () => {
+  Plyr.setup('.player', { controls });
+});
 
-    // ✅ VLC PLAYER
-    function vlc_player() {
-        const vlcIntent =
-            `intent:${streamLink}#Intent;scheme=http;package=org.videolan.vlc;end`;
-        const vlcDesktop = `vlc://${streamLink}`;
+/* ================= EXTERNAL PLAYERS ================= */
 
-        if (/Android/i.test(navigator.userAgent)) {
-            window.location.href = vlcIntent;
-        } else {
-            window.location.href = vlcDesktop;
-        }
-    }
+// ✅ VLC (WORKING)
+function vlc_player() {
+  if (/Android/i.test(navigator.userAgent)) {
+    window.location.href =
+      `intent://${streamUrl.replace(/^https?:\/\//, "")}` +
+      `#Intent;scheme=http;package=org.videolan.vlc;end`;
+  } else {
+    window.location.href = `vlc://${streamUrl}`;
+  }
+}
 
-    // ✅ MX PLAYER
-    function mx_player() {
-        window.location.href =
-            `intent:${streamLink}#Intent;scheme=http;package=com.mxtech.videoplayer.ad;end`;
-    }
+// ✅ MX Player (WORKING)
+function mx_player() {
+  window.location.href =
+    `intent://${streamUrl.replace(/^https?:\/\//, "")}` +
+    `#Intent;scheme=http;package=com.mxtech.videoplayer.ad;end`;
+}
 
-    // ✅ PLAYit PLAYER
-    function playit_player() {
-        window.location.href =
-            `intent://playerv2/video?url=${streamLink}#Intent;package=com.playit.videoplayer;end`;
-    }
+// ✅ PLAYit
+function playit_player() {
+  window.location.href =
+    `intent://playerv2/video?url=${streamUrl}` +
+    `#Intent;package=com.playit.videoplayer;end`;
+}
 
-    // ✅ KM PLAYER
-    function km_player() {
-        window.location.href =
-            `intent:${streamLink}#Intent;scheme=http;package=com.kmplayer;end`;
-    }
+// ✅ KM Player
+function km_player() {
+  window.location.href =
+    `intent://${streamUrl.replace(/^https?:\/\//, "")}` +
+    `#Intent;scheme=http;package=com.kmplayer;end`;
+}
 
-    /* ================= DIRECT DOWNLOAD ================= */
-
-    function lazyDownload() {
-        window.location.href = streamLink;
-    }
-
-    /* ================= SECURITY ================= */
-
-    document.addEventListener("contextmenu", e => e.preventDefault());
+// Download
+function lazyDownload() {
+  window.location.href = streamUrl;
+}
 </script>
+
 
 
 </body>
 </html>
 
 <!-- Don't Remove Credit @VJ_Botz | Tech VJ -->
+
 
 
 

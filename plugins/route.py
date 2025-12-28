@@ -53,26 +53,13 @@ class_cache = {}
 
 async def media_streamer(request: web.Request, id: int, secure_hash: str):
 
-    is_watch = request.path.startswith("/watch")
-
-    # ✅ Handle HEAD (Koyeb requirement)
-    if request.method == "HEAD":
-        return web.Response(
-            status=200,
-            headers={
-                "Accept-Ranges": "bytes",
-                "Content-Type": "video/mp4",
-            }
-        )
-
-    range_header = request.headers.get("Range", 0)
+    range_header = request.headers.get("Range")
 
     index = min(work_loads, key=work_loads.get)
     faster_client = multi_clients[index]
 
-    if faster_client in class_cache:
-        tg_connect = class_cache[faster_client]
-    else:
+    tg_connect = class_cache.get(faster_client)
+    if not tg_connect:
         tg_connect = ByteStreamer(faster_client)
         class_cache[faster_client] = tg_connect
 
@@ -83,60 +70,62 @@ async def media_streamer(request: web.Request, id: int, secure_hash: str):
 
     file_size = file_id.file_size
 
-    # ---- RANGE CALCULATION (RESTORED – IMPORTANT) ----
+    # ---- RANGE PARSING ----
     if range_header:
-        from_bytes, until_bytes = range_header.replace("bytes=", "").split("-")
-        from_bytes = int(from_bytes)
-        until_bytes = int(until_bytes) if until_bytes else file_size - 1
+        match = re.match(r"bytes=(\d+)-(\d*)", range_header)
+        from_bytes = int(match.group(1))
+        until_bytes = int(match.group(2)) if match.group(2) else file_size - 1
+        status = 206
     else:
-        from_bytes = request.http_range.start or 0
-        until_bytes = (request.http_range.stop or file_size) - 1
+        from_bytes = 0
+        until_bytes = file_size - 1
+        status = 200
 
-    if (until_bytes > file_size) or (from_bytes < 0) or (until_bytes < from_bytes):
+    if until_bytes >= file_size or from_bytes < 0:
         return web.Response(
             status=416,
-            body="416: Range not satisfiable",
-            headers={"Content-Range": f"bytes */{file_size}"},
+            headers={"Content-Range": f"bytes */{file_size}"}
         )
 
+    # ---- STREAM SETUP ----
     chunk_size = 1024 * 1024
-    until_bytes = min(until_bytes, file_size - 1)
-
     offset = from_bytes - (from_bytes % chunk_size)
     first_part_cut = from_bytes - offset
     last_part_cut = until_bytes % chunk_size + 1
-
-    req_length = until_bytes - from_bytes + 1
     part_count = math.ceil(until_bytes / chunk_size) - math.floor(offset / chunk_size)
+    req_length = until_bytes - from_bytes + 1
 
-    body = tg_connect.yield_file(
-        file_id,
-        index,
-        offset,
-        first_part_cut,
-        last_part_cut,
-        part_count,
-        chunk_size
-    )
+    mime_type = file_id.mime_type or "application/octet-stream"
+    file_name = file_id.file_name or "file.bin"
 
-    # ---- MIME + DISPOSITION ----
-    if is_watch:
-        mime_type = "video/mp4"
-        disposition = "inline"
-    else:
-        mime_type = file_id.mime_type or "application/octet-stream"
-        disposition = "attachment"
-
-    return web.Response(
-        status=206,
-        body=body,
+    response = web.StreamResponse(
+        status=status,
         headers={
             "Content-Type": mime_type,
             "Content-Length": str(req_length),
             "Content-Range": f"bytes {from_bytes}-{until_bytes}/{file_size}",
+            "Content-Disposition": f'inline; filename="{file_name}"',
             "Accept-Ranges": "bytes",
-            "Content-Disposition": f'{disposition}; filename="{file_id.file_name}"',
-            "Cache-Control": "no-cache",
-        },
+        }
     )
+
+    await response.prepare(request)
+
+    try:
+        async for chunk in tg_connect.yield_file(
+            file_id,
+            index,
+            offset,
+            first_part_cut,
+            last_part_cut,
+            part_count,
+            chunk_size
+        ):
+            await response.write(chunk)
+    finally:
+        await response.write_eof()
+
+    return response
+
+
 

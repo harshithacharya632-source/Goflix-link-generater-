@@ -101,15 +101,20 @@
 
     /* ================= EXTERNAL PLAYERS ================= */
 
-    // 🔥 VLC PLAYER (BEST)
-    function vlc_player() {
-        if (/Android/i.test(navigator.userAgent)) {
-            window.location.href =
-                `intent:${encodedStream}#Intent;scheme=http;package=org.videolan.vlc;end`;
-        } else {
-            window.location.href = `vlc://${streamLink}`;
-        }
-    }
+   function vlc_player() {
+		    const openLazyLink = lazyLink;
+		    const vlcIntent = `intent:${openLazyLink}#Intent;package=org.videolan.vlc;end`;
+		    const vlcScheme = `vlc://${openLazyLink}`;
+		
+		    // Detect if Android
+		    if (/Android/i.test(navigator.userAgent)) {
+		        window.location.href = vlcIntent;
+		    } else {
+		        window.location.href = vlcScheme;
+		    }
+		}
+
+	    
 
     // 🔥 MX PLAYER
     function mx_player() {
@@ -145,4 +150,5 @@
 </html>
 
 <!-- Don't Remove Credit @VJ_Botz | Tech VJ -->
+
 

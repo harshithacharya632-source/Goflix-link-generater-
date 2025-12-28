@@ -69,10 +69,11 @@
 <script src="https://cdn.plyr.io/3.6.12/plyr.js"></script>
 
 <script>
-    /* ================= BASIC LINKS ================= */
+    /* ================= STREAM LINK ================= */
 
-    const streamLink = "{{ file_url }}";   // backend stream URL
-    const encodedStream = encodeURIComponent(streamLink);
+    // Page URL → convert /watch/... → direct stream URL
+    const watchUrl = window.location.href;
+    const streamLink = watchUrl.replace("/watch/", "/");
 
     /* ================= PLYR PLAYER ================= */
 
@@ -93,7 +94,7 @@
     ];
 
     document.addEventListener('DOMContentLoaded', () => {
-        const players = Plyr.setup('.player', {
+        Plyr.setup('.player', {
             controls,
             autoplay: false
         });
@@ -101,37 +102,35 @@
 
     /* ================= EXTERNAL PLAYERS ================= */
 
-   function vlc_player() {
-		    const openLazyLink = lazyLink;
-		    const vlcIntent = `intent:${openLazyLink}#Intent;package=org.videolan.vlc;end`;
-		    const vlcScheme = `vlc://${openLazyLink}`;
-		
-		    // Detect if Android
-		    if (/Android/i.test(navigator.userAgent)) {
-		        window.location.href = vlcIntent;
-		    } else {
-		        window.location.href = vlcScheme;
-		    }
-		}
+    // ✅ VLC PLAYER
+    function vlc_player() {
+        const vlcIntent =
+            `intent:${streamLink}#Intent;scheme=http;package=org.videolan.vlc;end`;
+        const vlcDesktop = `vlc://${streamLink}`;
 
-	    
+        if (/Android/i.test(navigator.userAgent)) {
+            window.location.href = vlcIntent;
+        } else {
+            window.location.href = vlcDesktop;
+        }
+    }
 
-    // 🔥 MX PLAYER
+    // ✅ MX PLAYER
     function mx_player() {
         window.location.href =
-            `intent:${encodedStream}#Intent;scheme=http;package=com.mxtech.videoplayer.ad;end`;
+            `intent:${streamLink}#Intent;scheme=http;package=com.mxtech.videoplayer.ad;end`;
     }
 
-    // 🔥 PLAYit PLAYER
+    // ✅ PLAYit PLAYER
     function playit_player() {
         window.location.href =
-            `intent://playerv2/video?url=${encodedStream}#Intent;package=com.playit.videoplayer;end`;
+            `intent://playerv2/video?url=${streamLink}#Intent;package=com.playit.videoplayer;end`;
     }
 
-    // 🔥 KM PLAYER
+    // ✅ KM PLAYER
     function km_player() {
         window.location.href =
-            `intent:${encodedStream}#Intent;scheme=http;package=com.kmplayer;end`;
+            `intent:${streamLink}#Intent;scheme=http;package=com.kmplayer;end`;
     }
 
     /* ================= DIRECT DOWNLOAD ================= */
@@ -150,5 +149,6 @@
 </html>
 
 <!-- Don't Remove Credit @VJ_Botz | Tech VJ -->
+
 
 

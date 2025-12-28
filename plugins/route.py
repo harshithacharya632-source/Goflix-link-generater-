@@ -66,6 +66,9 @@ async def stream_handler(request: web.Request):
 class_cache = {}
 
 async def media_streamer(request: web.Request, id: int, secure_hash: str):
+    request_path = request.path.lower()
+    is_watch = request_path.startswith("/watch")
+
     range_header = request.headers.get("Range", 0)
     
     index = min(work_loads, key=work_loads.get)
@@ -119,9 +122,10 @@ async def media_streamer(request: web.Request, id: int, secure_hash: str):
         file_id, index, offset, first_part_cut, last_part_cut, part_count, chunk_size
     )
 
-    mime_type = file_id.mime_type
+    mime_type = file_id.mime_type or "application/octet-stream"
     file_name = file_id.file_name
-    disposition = "attachment"
+    disposition = "inline" if is_watch else "attachment"
+
 
     if mime_type:
         if not file_name:
@@ -145,5 +149,7 @@ async def media_streamer(request: web.Request, id: int, secure_hash: str):
             "Content-Length": str(req_length),
             "Content-Disposition": f'{disposition}; filename="{file_name}"',
             "Accept-Ranges": "bytes",
+            "Cache-Control": "no-cache",
         },
     )
+

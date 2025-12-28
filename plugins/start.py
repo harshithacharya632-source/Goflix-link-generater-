@@ -114,3 +114,14 @@ async def stream_start(client, message):
     
     # Run the auto-delete in background
     asyncio.create_task(auto_delete())
+
+# Auto-delete ONLY user uploaded file after 120 seconds
+async def delete_user_file():
+    await asyncio.sleep(120)
+    try:
+        await message.delete()
+        print(f"User file deleted after 120s: {message.id}")
+    except Exception as e:
+        print(f"Failed to delete user file: {e}")
+
+asyncio.create_task(delete_user_file())

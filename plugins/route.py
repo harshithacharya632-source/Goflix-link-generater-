@@ -2,154 +2,119 @@
 # Subscribe YouTube Channel For Amazing Bot @Tech_VJ
 # Ask Doubt on telegram @KingVJ01
 
-import re, math, logging, secrets, mimetypes, time
+import re, math, logging, secrets, mimetypes
 from info import *
 from aiohttp import web
 from aiohttp.http_exceptions import BadStatusLine
-from TechVJ.bot import multi_clients, work_loads, TechVJBot
+from TechVJ.bot import multi_clients, work_loads
 from TechVJ.server.exceptions import FIleNotFound, InvalidHash
-from TechVJ import StartTime, __version__
 from TechVJ.util.custom_dl import ByteStreamer
-from TechVJ.util.time_format import get_readable_time
 from TechVJ.util.render_template import render_page
 
 routes = web.RouteTableDef()
 
+# ---------- ROOT (Health check) ----------
 @routes.get("/", allow_head=True)
 async def root_route_handler(request):
-    return web.json_response("BenFilterBot")
+    return web.Response(text="OK", status=200)
 
+
+# ---------- WATCH PAGE ----------
 @routes.get(r"/watch/{path:\S+}", allow_head=True)
-async def stream_handler(request: web.Request):
+async def watch_page(request: web.Request):
     try:
         path = request.match_info["path"]
-        match = re.search(r"^([a-zA-Z0-9_-]{6})(\d+)$", path)
-        if match:
-            secure_hash = match.group(1)
-            id = int(match.group(2))
-        else:
-            id = int(re.search(r"(\d+)(?:\/\S+)?", path).group(1))
-            secure_hash = request.rel_url.query.get("hash")
-        return web.Response(text=await render_page(id, secure_hash), content_type='text/html')
-    except InvalidHash as e:
-        raise web.HTTPForbidden(text=e.message)
-    except FIleNotFound as e:
-        raise web.HTTPNotFound(text=e.message)
-    except (AttributeError, BadStatusLine, ConnectionResetError):
-        pass
-    except Exception as e:
-        logging.critical(e.with_traceback(None))
-        raise web.HTTPInternalServerError(text=str(e))
+        id = int(re.search(r"(\d+)", path).group(1))
+        secure_hash = request.rel_url.query.get("hash")
+        return web.Response(
+            text=await render_page(id, secure_hash),
+            content_type="text/html"
+        )
+    except Exception:
+        raise web.HTTPNotFound()
 
+
+# ---------- STREAM / DOWNLOAD ----------
 @routes.get(r"/{path:\S+}", allow_head=True)
-async def stream_handler(request: web.Request):
+async def file_handler(request: web.Request):
     try:
         path = request.match_info["path"]
-        match = re.search(r"^([a-zA-Z0-9_-]{6})(\d+)$", path)
-        if match:
-            secure_hash = match.group(1)
-            id = int(match.group(2))
-        else:
-            id = int(re.search(r"(\d+)(?:\/\S+)?", path).group(1))
-            secure_hash = request.rel_url.query.get("hash")
+        id = int(re.search(r"(\d+)", path).group(1))
+        secure_hash = request.rel_url.query.get("hash")
         return await media_streamer(request, id, secure_hash)
-    except InvalidHash as e:
-        raise web.HTTPForbidden(text=e.message)
-    except FIleNotFound as e:
-        raise web.HTTPNotFound(text=e.message)
-    except (AttributeError, BadStatusLine, ConnectionResetError):
-        pass
-    except Exception as e:
-        logging.critical(e.with_traceback(None))
-        raise web.HTTPInternalServerError(text=str(e))
+    except InvalidHash:
+        raise web.HTTPForbidden()
+    except FIleNotFound:
+        raise web.HTTPNotFound()
 
+
+# ---------- STREAM CORE ----------
 class_cache = {}
 
 async def media_streamer(request: web.Request, id: int, secure_hash: str):
-    request_path = request.path.lower()
-    is_watch = request_path.startswith("/watch")
 
-    range_header = request.headers.get("Range", 0)
-    
+    is_watch = request.path.startswith("/watch")
+
+    # ✅ VERY IMPORTANT: handle HEAD request
+    if request.method == "HEAD":
+        return web.Response(
+            status=200,
+            headers={
+                "Accept-Ranges": "bytes",
+                "Content-Type": "video/mp4",
+            }
+        )
+
+    range_header = request.headers.get("Range")
+
     index = min(work_loads, key=work_loads.get)
-    faster_client = multi_clients[index]
-    
-    if MULTI_CLIENT:
-        logging.info(f"Client {index} is now serving {request.remote}")
+    tg_client = multi_clients[index]
 
-    if faster_client in class_cache:
-        tg_connect = class_cache[faster_client]
-        logging.debug(f"Using cached ByteStreamer object for client {index}")
+    if tg_client in class_cache:
+        streamer = class_cache[tg_client]
     else:
-        logging.debug(f"Creating new ByteStreamer object for client {index}")
-        tg_connect = ByteStreamer(faster_client)
-        class_cache[faster_client] = tg_connect
-    logging.debug("before calling get_file_properties")
-    file_id = await tg_connect.get_file_properties(id)
-    logging.debug("after calling get_file_properties")
-    
+        streamer = ByteStreamer(tg_client)
+        class_cache[tg_client] = streamer
+
+    file_id = await streamer.get_file_properties(id)
+
     if file_id.unique_id[:6] != secure_hash:
-        logging.debug(f"Invalid hash for message with ID {id}")
         raise InvalidHash
-    
+
     file_size = file_id.file_size
 
     if range_header:
-        from_bytes, until_bytes = range_header.replace("bytes=", "").split("-")
-        from_bytes = int(from_bytes)
-        until_bytes = int(until_bytes) if until_bytes else file_size - 1
+        from_b, to_b = range_header.replace("bytes=", "").split("-")
+        from_b = int(from_b)
+        to_b = int(to_b) if to_b else file_size - 1
     else:
-        from_bytes = request.http_range.start or 0
-        until_bytes = (request.http_range.stop or file_size) - 1
-
-    if (until_bytes > file_size) or (from_bytes < 0) or (until_bytes < from_bytes):
-        return web.Response(
-            status=416,
-            body="416: Range not satisfiable",
-            headers={"Content-Range": f"bytes */{file_size}"},
-        )
+        from_b = 0
+        to_b = file_size - 1
 
     chunk_size = 1024 * 1024
-    until_bytes = min(until_bytes, file_size - 1)
-
-    offset = from_bytes - (from_bytes % chunk_size)
-    first_part_cut = from_bytes - offset
-    last_part_cut = until_bytes % chunk_size + 1
-
-    req_length = until_bytes - from_bytes + 1
-    part_count = math.ceil(until_bytes / chunk_size) - math.floor(offset / chunk_size)
-    body = tg_connect.yield_file(
-        file_id, index, offset, first_part_cut, last_part_cut, part_count, chunk_size
+    body = streamer.yield_file(
+        file_id, index,
+        from_b, 0, (to_b - from_b + 1),
+        1, chunk_size
     )
 
-    mime_type = file_id.mime_type or "application/octet-stream"
-    file_name = file_id.file_name
-    disposition = "inline" if is_watch else "attachment"
-
-
-    if mime_type:
-        if not file_name:
-            try:
-                file_name = f"{secrets.token_hex(2)}.{mime_type.split('/')[1]}"
-            except (IndexError, AttributeError):
-                file_name = f"{secrets.token_hex(2)}.unknown"
+    # ✅ FORCE MIME FOR STREAM
+    if is_watch:
+        mime_type = "video/mp4"
+        disposition = "inline"
     else:
-        if file_name:
-            mime_type = mimetypes.guess_type(file_id.file_name)
-        else:
-            mime_type = "application/octet-stream"
-            file_name = f"{secrets.token_hex(2)}.unknown"
+        mime_type = file_id.mime_type or "application/octet-stream"
+        disposition = "attachment"
 
     return web.Response(
-        status=206 if range_header else 200,
+        status=206,
         body=body,
         headers={
-            "Content-Type": f"{mime_type}",
-            "Content-Range": f"bytes {from_bytes}-{until_bytes}/{file_size}",
-            "Content-Length": str(req_length),
-            "Content-Disposition": f'{disposition}; filename="{file_name}"',
+            "Content-Type": mime_type,
+            "Content-Length": str(to_b - from_b + 1),
+            "Content-Range": f"bytes {from_b}-{to_b}/{file_size}",
             "Accept-Ranges": "bytes",
+            "Content-Disposition": f'{disposition}; filename="{file_id.file_name}"',
             "Cache-Control": "no-cache",
-        },
+        }
     )
-

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <title>{{ file_name }} | GOFLIX</title>
@@ -13,7 +13,7 @@ body{background:#000;color:#fff}
 .box{
  background:#1f2933;
  border-radius:16px;
- padding:30px;
+ padding:28px;
  text-align:center;
 }
 </style>
@@ -21,15 +21,16 @@ body{background:#000;color:#fff}
 
 <body>
 
-<div class="text-center p-3 fw-bold border-bottom">
+<div class="text-center p-3 border-bottom">
 <img src="https://i.ibb.co/Z6F9WZL9/1000489714.png" width="40"><br>
-GOFLIX
+<b>GOFLIX</b>
 </div>
 
 <div class="container d-flex justify-content-center align-items-center" style="min-height:70vh">
 <div class="box w-100">
-<h5>{{ file_name }}</h5>
+<h6>{{ file_name }}</h6>
 <p class="text-secondary">Size: {{ file_size }}</p>
+
 <a href="{{ file_url }}" class="btn btn-danger w-100 rounded-pill">
 ⬇ Download Now
 </a>

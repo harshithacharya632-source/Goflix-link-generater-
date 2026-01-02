@@ -2,127 +2,143 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>{{ file_name }} | Goflix</title>
+<title>{{ file_name }} | GOFLIX</title>
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="shortcut icon" href="https://i.ibb.co/Z6F9WZL9/1000489714.png">
+<link rel="icon" href="https://i.ibb.co/Z6F9WZL9/1000489714.png">
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.plyr.io/3.6.12/plyr.css" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css">
 <script src="https://cdn.tailwindcss.com"></script>
 
 <style>
-.card-hover:hover{
- transform: translateY(-6px);
- box-shadow: 0 0 15px rgba(255,255,255,.25);
- transition: .3s;
+.card-box{
+ background:#1f2933;
+ border-radius:14px;
+ padding:18px;
+ text-align:center;
+ cursor:pointer;
+}
+.card-box img{
+ width:48px;
+ height:48px;
+}
+.card-box span{
+ display:block;
+ margin-top:8px;
+ font-size:14px;
+ color:#ddd;
 }
 </style>
 </head>
 
-<body class="bg-black text-light">
+<body class="bg-black text-white">
 
-<!-- TITLE -->
-<div class="text-center p-3">
-<h5 class="fw-bold">{{ file_name }}</h5>
+<!-- HEADER -->
+<div class="d-flex align-items-center p-3 border-bottom border-secondary">
+<img src="https://i.ibb.co/Z6F9WZL9/1000489714.png" width="40">
+<h5 class="ms-2 text-warning mb-0">GOFLIX</h5>
 </div>
 
-<!-- VIDEO PLAYER -->
-<div class="d-flex justify-content-center">
-<div class="w-full lg:w-9/12 border border-danger p-2">
-<video id="player" class="player" playsinline controls preload="auto" crossorigin="anonymous">
+<!-- TITLE -->
+<div class="text-center p-2 fw-bold">
+{{ file_name }}
+</div>
+
+<!-- VIDEO -->
+<div class="px-2">
+<video id="player" playsinline muted controls preload="auto" crossorigin="anonymous">
 <source src="{{ file_url }}" type="video/mp4">
 </video>
 </div>
-</div>
 
 <!-- EXTERNAL PLAYERS -->
-<div class="container mt-4">
-<h4 class="text-warning mb-3">Play with external players</h4>
+<div class="p-3">
+<h5 class="text-warning mb-3">Play with...</h5>
 
-<div class="row g-3 justify-content-center">
+<div class="row g-3">
 
-<div class="col-5 col-lg-3">
-<div onclick="vlc_player()" class="card card-body bg-dark text-center card-hover">
-VLC Player
-</div>
-</div>
-
-<div class="col-5 col-lg-3">
-<div onclick="mx_player()" class="card card-body bg-dark text-center card-hover">
-MX Player
+<div class="col-6" onclick="openVLC()">
+<div class="card-box">
+<img src="https://upload.wikimedia.org/wikipedia/commons/9/9a/VLC_Icon.svg">
+<span>VLC Player</span>
 </div>
 </div>
 
-<div class="col-5 col-lg-3">
-<div onclick="km_player()" class="card card-body bg-dark text-center card-hover">
-KM Player
+<div class="col-6" onclick="openMX()">
+<div class="card-box">
+<img src="https://i.ibb.co/yhFvF90/mx.png">
+<span>MX Player</span>
 </div>
 </div>
 
-<div class="col-5 col-lg-3">
-<div onclick="playit_player()" class="card card-body bg-dark text-center card-hover">
-PLAYit
+<div class="col-6" onclick="openPLAYit()">
+<div class="card-box">
+<img src="https://i.ibb.co/QY1X8yD/playit.png">
+<span>Play-it</span>
 </div>
 </div>
 
-<div class="col-12 mt-3">
-<button onclick="downloadVideo()" class="btn btn-danger w-100">
+<div class="col-6" onclick="openKM()">
+<div class="card-box">
+<img src="https://i.ibb.co/YdC0n5L/km.png">
+<span>KM Player</span>
+</div>
+</div>
+
+<div class="col-6" onclick="openS()">
+<div class="card-box">
+<img src="https://i.ibb.co/LrZHL6h/splayer.png">
+<span>S Player</span>
+</div>
+</div>
+
+<div class="col-6" onclick="openHD()">
+<div class="card-box">
+<img src="https://i.ibb.co/XDWLm7D/hd.png">
+<span>HD Player (4K)</span>
+</div>
+</div>
+
+</div>
+
+<!-- DOWNLOAD -->
+<button onclick="download()" class="btn btn-secondary w-100 mt-4 rounded-pill">
 Download Now
 </button>
 </div>
 
-</div>
-</div>
-
-<div class="text-center mt-4 text-secondary">
-If stream buffers, pause 2–3 sec and play again.
-</div>
-
-<script src="https://cdn.plyr.io/3.6.12/plyr.js"></script>
+<script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
 
 <script>
-/* ================= STREAM URL ================= */
-const streamUrl = "{{ file_url }}";
+const url = encodeURIComponent("{{ file_url }}");
 
-/* ================= PLYR FIX ================= */
-const player = new Plyr('#player', {
-controls: [
-'play-large','play','progress','current-time',
-'mute','volume','settings','fullscreen'
-],
-ratio: '16:9'
+new Plyr('#player',{
+ muted:true,
+ playsinline:true
 });
 
-/* ================= EXTERNAL PLAYERS ================= */
-
-function vlc_player(){
-if(/Android/i.test(navigator.userAgent)){
-window.location.href =
-`intent://${streamUrl.replace(/^https?:\/\//,'')}#Intent;scheme=http;package=org.videolan.vlc;end`;
-}else{
-window.location.href = `vlc://${streamUrl}`;
+/* ANDROID INTENTS */
+function openVLC(){
+ location.href = `intent:${decodeURIComponent(url)}#Intent;package=org.videolan.vlc;type=video/*;end`;
 }
+function openMX(){
+ location.href = `intent:${decodeURIComponent(url)}#Intent;package=com.mxtech.videoplayer.ad;end`;
 }
-
-function mx_player(){
-window.location.href =
-`intent://${streamUrl.replace(/^https?:\/\//,'')}#Intent;scheme=http;package=com.mxtech.videoplayer.ad;end`;
+function openPLAYit(){
+ location.href = `intent://playerv2/video?url=${url}#Intent;package=com.playit.videoplayer;end`;
 }
-
-function playit_player(){
-window.location.href =
-`intent://playerv2/video?url=${streamUrl}#Intent;package=com.playit.videoplayer;end`;
+function openKM(){
+ location.href = `intent:${decodeURIComponent(url)}#Intent;package=com.kmplayer;end`;
 }
-
-function km_player(){
-window.location.href =
-`intent://${streamUrl.replace(/^https?:\/\//,'')}#Intent;scheme=http;package=com.kmplayer;end`;
+function openS(){
+ location.href = `intent:${decodeURIComponent(url)}#Intent;package=com.simplemobiletools.videoplayer;end`;
 }
-
-function downloadVideo(){
-window.open(streamUrl, "_blank");
+function openHD(){
+ location.href = `intent:${decodeURIComponent(url)}#Intent;package=uplayer.video.player;end`;
+}
+function download(){
+ window.open("{{ file_url }}","_blank");
 }
 </script>
 

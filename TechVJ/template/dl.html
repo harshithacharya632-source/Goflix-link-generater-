@@ -7,9 +7,9 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!-- ✅ FIXED -->
     <title>{{ file_name }} | Goflix</title>
 
+    <!-- CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/wow/1.1.2/wow.min.js"></script>    
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
@@ -20,14 +20,15 @@
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
-<body class='bg-gradient-to-bl from-yellow-500 via-red-600 to-orange-500'>
+<body class="bg-gradient-to-bl from-yellow-500 via-red-600 to-orange-500">
 
+<!-- ================= HEADER ================= -->
 <header>
-<nav class="navbar bg-dark p-lg-4 p-2">
-    <div class="container-fluid">
-        <span class="navbar-brand text-light fw-bold">Goflix</span>
-    </div>
-</nav>
+    <nav class="navbar bg-dark p-lg-4 p-2">
+        <div class="container-fluid">
+            <span class="navbar-brand text-light fw-bold">Goflix</span>
+        </div>
+    </nav>
 </header>
 
 <!-- ================= FILE NAME ================= -->
@@ -48,9 +49,11 @@
                     hover:bg-gradient-to-r from-pink-500 to-violet-500
                     hover:shadow-md hover:translate-y-[-5px]
                     transition duration-300 wow animate__animated animate__rubberBand">
+
             ⬇️ Download File
             <br>
             <small class="text-secondary">{{ file_size }}</small>
+
         </div>
     </a>
 </div>
@@ -72,10 +75,10 @@
 </script>
 
 <script>
-    var div = document.getElementById('myDiv');
-    var text = div.textContent;
-    if (text.length > 60) {
-        div.textContent = text.slice(0, 60) + "....";
+    // Trim long filenames safely
+    const div = document.getElementById('myDiv');
+    if (div && div.textContent.length > 60) {
+        div.textContent = div.textContent.slice(0, 60) + "…";
     }
 </script>
 

@@ -9,9 +9,18 @@
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css">
-<script src="https://cdn.tailwindcss.com"></script>
 
 <style>
+body{background:#000;color:#fff}
+.header{
+ display:flex;
+ align-items:center;
+ padding:12px;
+ border-bottom:1px solid #333;
+}
+.header img{width:38px}
+.player-box{padding:8px}
+
 .card-box{
  background:#1f2933;
  border-radius:14px;
@@ -20,23 +29,23 @@
  cursor:pointer;
 }
 .card-box img{
- width:48px;
- height:48px;
+ width:46px;
+ height:46px;
 }
 .card-box span{
  display:block;
- margin-top:8px;
- font-size:14px;
+ margin-top:6px;
  color:#ddd;
+ font-size:14px;
 }
 </style>
 </head>
 
-<body class="bg-black text-white">
+<body>
 
 <!-- HEADER -->
-<div class="d-flex align-items-center p-3 border-bottom border-secondary">
-<img src="https://i.ibb.co/Z6F9WZL9/1000489714.png" width="40">
+<div class="header">
+<img src="https://i.ibb.co/Z6F9WZL9/1000489714.png">
 <h5 class="ms-2 text-warning mb-0">GOFLIX</h5>
 </div>
 
@@ -45,65 +54,64 @@
 {{ file_name }}
 </div>
 
-<!-- VIDEO -->
-<div class="px-2">
-<video id="player" playsinline muted controls preload="auto" crossorigin="anonymous">
+<!-- WEB PLAYER -->
+<div class="player-box">
+<video id="player" controls playsinline muted preload="metadata" style="width:100%">
 <source src="{{ file_url }}" type="video/mp4">
 </video>
 </div>
 
-<!-- EXTERNAL PLAYERS -->
+<!-- PLAY WITH -->
 <div class="p-3">
 <h5 class="text-warning mb-3">Play with...</h5>
 
 <div class="row g-3">
 
-<div class="col-6" onclick="openVLC()">
+<div class="col-6" onclick="vlc_player()">
 <div class="card-box">
-<img src="https://upload.wikimedia.org/wikipedia/commons/9/9a/VLC_Icon.svg">
+<img src="https://i.ibb.co/4nWSjq5/vlc.png">
 <span>VLC Player</span>
 </div>
 </div>
 
-<div class="col-6" onclick="openMX()">
+<div class="col-6" onclick="mx_player()">
 <div class="card-box">
-<img src="https://i.ibb.co/yhFvF90/mx.png">
+<img src="https://i.ibb.co/9HT7jf7/mx.png">
 <span>MX Player</span>
 </div>
 </div>
 
-<div class="col-6" onclick="openPLAYit()">
+<div class="col-6" onclick="playit_player()">
 <div class="card-box">
-<img src="https://i.ibb.co/QY1X8yD/playit.png">
+<img src="https://i.ibb.co/v6693WBf/playit.png">
 <span>Play-it</span>
 </div>
 </div>
 
-<div class="col-6" onclick="openKM()">
+<div class="col-6" onclick="km_player()">
 <div class="card-box">
-<img src="https://i.ibb.co/YdC0n5L/km.png">
+<img src="https://i.ibb.co/kVcg0TSp/km.png">
 <span>KM Player</span>
 </div>
 </div>
 
-<div class="col-6" onclick="openS()">
+<div class="col-6" onclick="s_player()">
 <div class="card-box">
-<img src="https://i.ibb.co/LrZHL6h/splayer.png">
+<img src="https://i.ibb.co/NdpF8gH0/splayer.png">
 <span>S Player</span>
 </div>
 </div>
 
-<div class="col-6" onclick="openHD()">
+<div class="col-6" onclick="hd_player()">
 <div class="card-box">
-<img src="https://i.ibb.co/XDWLm7D/hd.png">
+<img src="https://i.ibb.co/4nWSjq5z/hd.png">
 <span>HD Player (4K)</span>
 </div>
 </div>
 
 </div>
 
-<!-- DOWNLOAD -->
-<button onclick="download()" class="btn btn-secondary w-100 mt-4 rounded-pill">
+<button onclick="lazyDownload()" class="btn btn-secondary w-100 mt-4 rounded-pill">
 Download Now
 </button>
 </div>
@@ -111,34 +119,51 @@ Download Now
 <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
 
 <script>
-const url = encodeURIComponent("{{ file_url }}");
+const streamUrl = "{{ file_url }}";
+const cleanUrl = streamUrl.replace(/^https?:\/\//,'');
 
-new Plyr('#player',{
- muted:true,
- playsinline:true
-});
+// Web player init
+new Plyr('#player',{muted:true,playsinline:true});
 
-/* ANDROID INTENTS */
-function openVLC(){
- location.href = `intent:${decodeURIComponent(url)}#Intent;package=org.videolan.vlc;type=video/*;end`;
+// VLC
+function vlc_player(){
+ if(/Android/i.test(navigator.userAgent)){
+   location.href = `intent://${cleanUrl}#Intent;package=org.videolan.vlc;end`;
+ }else{
+   location.href = `vlc://${streamUrl}`;
+ }
 }
-function openMX(){
- location.href = `intent:${decodeURIComponent(url)}#Intent;package=com.mxtech.videoplayer.ad;end`;
+
+// MX
+function mx_player(){
+ location.href = `intent://${cleanUrl}#Intent;package=com.mxtech.videoplayer.ad;end`;
 }
-function openPLAYit(){
- location.href = `intent://playerv2/video?url=${url}#Intent;package=com.playit.videoplayer;end`;
+
+// PLAYit
+function playit_player(){
+ location.href =
+ `intent://playerv2/video?url=${encodeURIComponent(streamUrl)}` +
+ `#Intent;package=com.playit.videoplayer;end`;
 }
-function openKM(){
- location.href = `intent:${decodeURIComponent(url)}#Intent;package=com.kmplayer;end`;
+
+// KM
+function km_player(){
+ location.href = `intent://${cleanUrl}#Intent;package=com.kmplayer;end`;
 }
-function openS(){
- location.href = `intent:${decodeURIComponent(url)}#Intent;package=com.simplemobiletools.videoplayer;end`;
+
+// S Player
+function s_player(){
+ location.href = `intent://${cleanUrl}#Intent;package=com.simplemobiletools.videoplayer;end`;
 }
-function openHD(){
- location.href = `intent:${decodeURIComponent(url)}#Intent;package=uplayer.video.player;end`;
+
+// HD Player 4K
+function hd_player(){
+ location.href = `intent://${cleanUrl}#Intent;package=uplayer.video.player;end`;
 }
-function download(){
- window.open("{{ file_url }}","_blank");
+
+// Download
+function lazyDownload(){
+ window.open(streamUrl,"_blank");
 }
 </script>
 

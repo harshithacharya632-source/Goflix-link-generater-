@@ -1,82 +1,88 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <link rel="shortcut icon" href="https://i.ibb.co/Z6F9WZL9/1000489714.png" type="image/x-icon">
-    <meta property="og:image" content="https://i.ibb.co/Z6F9WZL9/1000489714.png" itemprop="thumbnailUrl">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
 
-    <!-- ✅ FIXED -->
-    <title>{{ file_name }} | Goflix</title>
+<title>{{ file_name }} | Goflix</title>
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/wow/1.1.2/wow.min.js"></script>    
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Delius">
-    <script src="https://cdn.tailwindcss.com"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="shortcut icon" href="https://i.ibb.co/Z6F9WZL9/1000489714.png">
+
+<meta property="og:image" content="https://i.ibb.co/Z6F9WZL9/1000489714.png">
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/wow/1.1.2/wow.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+.card-hover:hover{
+ transform: translateY(-6px);
+ box-shadow: 0 0 18px rgba(255,255,255,.35);
+ transition: .3s;
+}
+</style>
 </head>
 
-<body class='bg-gradient-to-bl from-yellow-500 via-red-600 to-orange-500'>
+<body class="bg-gradient-to-bl from-yellow-500 via-red-600 to-orange-500">
 
-<header>
-<nav class="navbar bg-dark p-lg-4 p-2">
-    <div class="container-fluid">
-        <span class="navbar-brand text-light fw-bold">Goflix</span>
-    </div>
+<!-- NAVBAR -->
+<nav class="navbar bg-dark p-3">
+<span class="navbar-brand text-light fw-bold">Goflix</span>
 </nav>
-</header>
 
-<!-- ================= FILE NAME ================= -->
+<!-- FILE NAME -->
 <div class="bg-black text-light">
-    <div class="d-flex justify-content-center">
-        <div class="p-3 text-center">
-            <span id="myDiv" class="h6 fw-bold wow animate__animated animate__fadeInRight">
-                {{ file_name }}
-            </span>
-        </div>
-    </div>
+<div class="d-flex justify-content-center">
+<div class="p-3 text-center">
+<span id="myDiv"
+ class="h6 fw-bold wow animate__animated animate__fadeInRight">
+ {{ file_name }}
+</span>
+</div>
+</div>
 </div>
 
-<!-- ================= DOWNLOAD CARD ================= -->
-<div class="container flex justify-center items-center min-h-screen">
-    <a class="w-full flex justify-center items-center" href="{{ file_url }}">
-        <div class="col-lg-4 p-3 col-12 rounded-3xl bg-dark text-white text-center
-                    hover:bg-gradient-to-r from-pink-500 to-violet-500
-                    hover:shadow-md hover:translate-y-[-5px]
-                    transition duration-300 wow animate__animated animate__rubberBand">
-            ⬇️ Download File
-            <br>
-            <small class="text-secondary">{{ file_size }}</small>
-        </div>
-    </a>
+<!-- DOWNLOAD CARD -->
+<div class="container d-flex justify-content-center align-items-center min-h-screen">
+<a href="{{ file_url }}" class="w-100 d-flex justify-content-center text-decoration-none">
+
+<div class="col-lg-4 col-12 p-4 rounded-3xl bg-dark text-white text-center
+            card-hover wow animate__animated animate__rubberBand">
+
+<h4 class="fw-bold">⬇ Download File</h4>
+
+<p class="text-secondary mt-2">
+Size: {{ file_size }}
+</p>
+
+<div class="mt-3 badge bg-danger px-4 py-2">
+Fast Download
 </div>
 
-<!-- ================= FOOTER ================= -->
+</div>
+</a>
+</div>
+
+<!-- FOOTER -->
 <footer class="bg-dark text-light">
-    <div class="text-center p-3">
-        © <script>document.write(new Date().getFullYear())</script>
-        <a class="text-decoration-none text-warning fw-bold" href="https://t.me/trendi_Backup">
-            Goflix
-        </a>
-        — All rights reserved
-    </div>
+<div class="text-center p-3 text-sm">
+© <script>document.write(new Date().getFullYear())</script>
+<a href="https://t.me/trendi_Backup"
+ class="text-warning fw-bold text-decoration-none">
+ Goflix
+</a>
+— All rights reserved
+</div>
 </footer>
 
-<!-- ================= SCRIPTS ================= -->
 <script>
-    new WOW().init();
-</script>
+new WOW().init();
 
-<script>
-    var div = document.getElementById('myDiv');
-    var text = div.textContent;
-    if (text.length > 60) {
-        div.textContent = text.slice(0, 60) + "....";
-    }
+const div = document.getElementById("myDiv");
+if(div.textContent.length > 60){
+ div.textContent = div.textContent.slice(0,60) + "....";
+}
 </script>
 
 </body>

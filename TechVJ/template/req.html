@@ -1,90 +1,106 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<link rel="shortcut icon" href="https://i.ibb.co/Z6F9WZL9/1000489714.png">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{{ file_name }} | Goflix</title>
+    <meta charset="UTF-8">
+    <link rel="shortcut icon" href="https://i.ibb.co/Z6F9WZL9/1000489714.png" type="image/x-icon">
+    <meta property="og:image" content="https://i.ibb.co/Z6F9WZL9/1000489714.png" itemprop="thumbnailUrl">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ file_name }} | Goflix</title>
 
-<!-- CSS -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-<link rel="stylesheet" href="https://cdn.plyr.io/3.6.12/plyr.css" />
-<script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.plyr.io/3.6.9/plyr.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
 <body class="bg-black text-light">
 
-<!-- ================= FILE NAME ================= -->
+<!-- ================= VIDEO TITLE ================= -->
 <div class="text-center p-3">
-  <h5 id="fileName" class="fw-bold animate__animated animate__fadeInRight">
-    {{ file_name }}
-  </h5>
+    <h5 class="fw-bold">{{ file_name }}</h5>
 </div>
 
 <!-- ================= VIDEO PLAYER ================= -->
 <div class="d-flex justify-content-center">
-  <div class="w-full lg:w-9/12 border border-danger p-2 animate__animated animate__fadeInLeft">
-    <video id="player" class="player" playsinline controls preload="metadata">
-      <source src="{{ file_url }}" type="video/mp4">
-    </video>
-  </div>
+    <div class="w-full lg:w-9/12 border border-danger p-2">
+        <video id="player" class="player" playsinline controls>
+            <!-- 🔥 STREAM URL -->
+            <source src="{{ file_url }}" type="video/mp4">
+        </video>
+    </div>
 </div>
 
-<!-- ================= EXTERNAL PLAYERS ================= -->
+<!-- ================= PLAYER OPTIONS ================= -->
 <div class="container mt-4">
-  <h4 class="text-warning mb-3">Play with external players</h4>
+    <h4 class="text-warning mb-3">Play with external players</h4>
 
-  <div class="row g-2 justify-content-center">
-    <div class="col-5 col-lg-3">
-      <button onclick="vlc_player()" class="btn btn-dark w-100">VLC Player</button>
-    </div>
+    <div class="row g-2 justify-content-center">
 
-    <div class="col-5 col-lg-3">
-      <button onclick="mx_player()" class="btn btn-dark w-100">MX Player</button>
-    </div>
+        <div class="col-5 col-lg-3">
+            <button onclick="vlc_player()" class="btn btn-dark w-100">VLC Player</button>
+        </div>
 
-    <div class="col-5 col-lg-3">
-      <button onclick="km_player()" class="btn btn-dark w-100">KM Player</button>
-    </div>
+        <div class="col-5 col-lg-3">
+            <button onclick="mx_player()" class="btn btn-dark w-100">MX Player</button>
+        </div>
 
-    <div class="col-5 col-lg-3">
-      <button onclick="playit_player()" class="btn btn-dark w-100">PlayIt</button>
-    </div>
+        <div class="col-5 col-lg-3">
+            <button onclick="km_player()" class="btn btn-dark w-100">KM Player</button>
+        </div>
 
-    <div class="col-12 mt-3">
-      <button onclick="lazyDownload()" class="btn btn-danger w-100">Download Now</button>
+        <div class="col-5 col-lg-3">
+            <button onclick="playit_player()" class="btn btn-dark w-100">PlayIt</button>
+        </div>
+
+        <div class="col-12 mt-3">
+            <button onclick="lazyDownload()" class="btn btn-danger w-100">Download Now</button>
+        </div>
     </div>
-  </div>
 </div>
 
-<!-- ================= INFO ================= -->
+<!-- ================= FOOTER MESSAGE ================= -->
 <div class="text-center mt-4 text-secondary">
-  Video not playing? Download and watch offline.
+    Video not playing? Download and watch offline.
 </div>
 
-<!-- ================= JS ================= -->
 <script src="https://cdn.plyr.io/3.6.12/plyr.js"></script>
 
 <script>
-/* ========= STREAM URL (SAFE FOR KOYEB) ========= */
-const streamUrl = "{{ file_url }}";
+/* ================= STREAM URL ================= */
 
-/* ========= PLYR INIT ========= */
+// current page URL
+const pageUrl = window.location.href;
+
+// convert /watch/ → /
+const streamUrl = pageUrl.replace("/watch/", "/");
+
+/* ================= PLYR ================= */
+
 const controls = [
-  'play-large','rewind','play','fast-forward',
-  'progress','current-time','duration',
-  'mute','volume','settings','pip','airplay','fullscreen'
+  'play-large',
+  'rewind',
+  'play',
+  'fast-forward',
+  'progress',
+  'current-time',
+  'duration',
+  'mute',
+  'volume',
+  'settings',
+  'pip',
+  'airplay',
+  'fullscreen'
 ];
 
 document.addEventListener('DOMContentLoaded', () => {
   Plyr.setup('.player', { controls });
 });
 
-/* ========= EXTERNAL PLAYERS ========= */
+/* ================= EXTERNAL PLAYERS ================= */
 
-// VLC
+// ✅ VLC (WORKING)
 function vlc_player() {
   if (/Android/i.test(navigator.userAgent)) {
     window.location.href =
@@ -95,21 +111,21 @@ function vlc_player() {
   }
 }
 
-// MX Player
+// ✅ MX Player (WORKING)
 function mx_player() {
   window.location.href =
     `intent://${streamUrl.replace(/^https?:\/\//, "")}` +
     `#Intent;scheme=http;package=com.mxtech.videoplayer.ad;end`;
 }
 
-// PLAYit
+// ✅ PLAYit
 function playit_player() {
   window.location.href =
-    `intent://playerv2/video?url=${encodeURIComponent(streamUrl)}` +
+    `intent://playerv2/video?url=${streamUrl}` +
     `#Intent;package=com.playit.videoplayer;end`;
 }
 
-// KM Player
+// ✅ KM Player
 function km_player() {
   window.location.href =
     `intent://${streamUrl.replace(/^https?:\/\//, "")}` +
@@ -122,5 +138,12 @@ function lazyDownload() {
 }
 </script>
 
+
+
 </body>
 </html>
+
+<!-- Don't Remove Credit @VJ_Botz | Tech VJ -->
+
+
+

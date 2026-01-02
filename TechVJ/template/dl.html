@@ -1,89 +1,40 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-
-<title>{{ file_name }} | Goflix</title>
+<title>{{ file_name }} | GOFLIX</title>
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="shortcut icon" href="https://i.ibb.co/Z6F9WZL9/1000489714.png">
-
-<meta property="og:image" content="https://i.ibb.co/Z6F9WZL9/1000489714.png">
-
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/wow/1.1.2/wow.min.js"></script>
-<script src="https://cdn.tailwindcss.com"></script>
+<link rel="icon" href="https://i.ibb.co/Z6F9WZL9/1000489714.png">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
 <style>
-.card-hover:hover{
- transform: translateY(-6px);
- box-shadow: 0 0 18px rgba(255,255,255,.35);
- transition: .3s;
+body{background:#000;color:#fff}
+.box{
+ background:#1f2933;
+ border-radius:16px;
+ padding:30px;
+ text-align:center;
 }
 </style>
 </head>
 
-<body class="bg-gradient-to-bl from-yellow-500 via-red-600 to-orange-500">
+<body>
 
-<!-- NAVBAR -->
-<nav class="navbar bg-dark p-3">
-<span class="navbar-brand text-light fw-bold">Goflix</span>
-</nav>
-
-<!-- FILE NAME -->
-<div class="bg-black text-light">
-<div class="d-flex justify-content-center">
-<div class="p-3 text-center">
-<span id="myDiv"
- class="h6 fw-bold wow animate__animated animate__fadeInRight">
- {{ file_name }}
-</span>
-</div>
-</div>
+<div class="text-center p-3 fw-bold border-bottom">
+<img src="https://i.ibb.co/Z6F9WZL9/1000489714.png" width="40"><br>
+GOFLIX
 </div>
 
-<!-- DOWNLOAD CARD -->
-<div class="container d-flex justify-content-center align-items-center min-h-screen">
-<a href="{{ file_url }}" class="w-100 d-flex justify-content-center text-decoration-none">
-
-<div class="col-lg-4 col-12 p-4 rounded-3xl bg-dark text-white text-center
-            card-hover wow animate__animated animate__rubberBand">
-
-<h4 class="fw-bold">⬇ Download File</h4>
-
-<p class="text-secondary mt-2">
-Size: {{ file_size }}
-</p>
-
-<div class="mt-3 badge bg-danger px-4 py-2">
-Fast Download
-</div>
-
-</div>
+<div class="container d-flex justify-content-center align-items-center" style="min-height:70vh">
+<div class="box w-100">
+<h5>{{ file_name }}</h5>
+<p class="text-secondary">Size: {{ file_size }}</p>
+<a href="{{ file_url }}" class="btn btn-danger w-100 rounded-pill">
+⬇ Download Now
 </a>
 </div>
-
-<!-- FOOTER -->
-<footer class="bg-dark text-light">
-<div class="text-center p-3 text-sm">
-© <script>document.write(new Date().getFullYear())</script>
-<a href="https://t.me/trendi_Backup"
- class="text-warning fw-bold text-decoration-none">
- Goflix
-</a>
-— All rights reserved
 </div>
-</footer>
-
-<script>
-new WOW().init();
-
-const div = document.getElementById("myDiv");
-if(div.textContent.length > 60){
- div.textContent = div.textContent.slice(0,60) + "....";
-}
-</script>
 
 </body>
 </html>

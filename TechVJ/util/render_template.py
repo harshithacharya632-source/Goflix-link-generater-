@@ -34,15 +34,11 @@ async def render_page(id, secure_hash):
     # -------- URL SELECTION --------
     if mime_main in ["video", "audio"]:
         # STREAM URL (IMPORTANT)
-        #file_url = urllib.parse.urljoin(
-        #     URL,
-        #     f"stream/{id}?hash={secure_hash}"
-        # )
-         file_url = urllib.parse.urljoin(
-                URL,
-                f"{id}?hash={secure_hash}"
-              )
-
+        file_url = urllib.parse.urljoin(
+            URL,
+            f"{id}?hash={secure_hash}"
+        )
+         
         template_file = "TechVJ/template/req.html"
     else:
         # DOWNLOAD URL

@@ -145,18 +145,13 @@
             </div>
         </div>
         <!-- Online Video Player -> to be displayed here  -->
-        <div class="justify-content-center align-items-center w-100 d-flex flex-wrap">
-		  <div class="lg:w-9/12 lg:px-12 lg:py-4 w-full border border-danger">
-		    <video
-		      id="player"
-		      class="player"
-		      controls
-		      playsinline
-		      preload="metadata"
-		      src="{{file_url}}">
-		    </video>
-		  </div>
-		</div>
+         <div class="justify-content-center align-items-center w-100 d-flex  flex-wrap">
+            <div class="lg:w-9/12 lg:px-12 lg:py-4 w-full  border border-danger wow animate__animated animate__fadeInLeft">
+                <video id="player" class="player " playsinline controls>
+                    <source src="{{file_url}}" type="video/mp4">
+                </video>
+            </div>
+        </div>
 
 
         <!-- External video player section -->
@@ -439,6 +434,7 @@
 </html>
 
 <!--  Don't Remove Credit @VJ_Bot Subscribe YouTube Channel For Amazing Bot @Tech_VJ Ask Doubt on telegram @KingVJ01 -->
+
 
 
 

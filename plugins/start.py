@@ -63,17 +63,41 @@ async def stream_start(client, message):
 
     file_name = get_name(log_msg)
 
+    # # Generate links
+    # if not SHORTLINK:
+    #     stream = f"{URL}/watch/{log_msg.id}/{quote_plus(file_name)}?hash={get_hash(log_msg)}"
+    #     download = f"{URL}/download/{log_msg.id}/{quote_plus(file_name)}?hash={get_hash(log_msg)}"
+    # else:
+    #     stream = await get_shortlink(
+    #         f"{URL}/watch/{log_msg.id}/{quote_plus(file_name)}?hash={get_hash(log_msg)}"
+    #     )
+    #     download = await get_shortlink(
+    #         f"{URL}/download/{log_msg.id}/{quote_plus(file_name)}?hash={get_hash(log_msg)}"
+    #     )
     # Generate links
     if not SHORTLINK:
-        stream = f"{URL}/watch/{log_msg.id}/{quote_plus(file_name)}?hash={get_hash(log_msg)}"
-        download = f"{URL}/download/{log_msg.id}/{quote_plus(file_name)}?hash={get_hash(log_msg)}"
+        # Player page
+        watch = f"{URL}/watch/{log_msg.id}?hash={get_hash(log_msg)}"
+    
+        # 🔥 DIRECT STREAM (USED BY WEB PLAYER)
+        stream = f"{URL}/{log_msg.id}?hash={get_hash(log_msg)}"
+    
+        # Download
+        download = f"{URL}/download/{log_msg.id}?hash={get_hash(log_msg)}"
+    
     else:
+        watch = await get_shortlink(
+            f"{URL}/watch/{log_msg.id}?hash={get_hash(log_msg)}"
+        )
+    
         stream = await get_shortlink(
-            f"{URL}/watch/{log_msg.id}/{quote_plus(file_name)}?hash={get_hash(log_msg)}"
+            f"{URL}/{log_msg.id}?hash={get_hash(log_msg)}"
         )
+    
         download = await get_shortlink(
-            f"{URL}/download/{log_msg.id}/{quote_plus(file_name)}?hash={get_hash(log_msg)}"
+            f"{URL}/download/{log_msg.id}?hash={get_hash(log_msg)}"
         )
+
 
     # Buttons
     rm = InlineKeyboardMarkup(

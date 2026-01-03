@@ -197,16 +197,22 @@ async def stream_start(client, message):
     fileName = get_name(log_msg)
 
     # Generate stream & download links
+    # Generate stream & download links
     if SHORTLINK is False:
-        stream = f"{URL}/watch/{str(log_msg.id)}/{quote_plus(get_name(log_msg))}?hash={get_hash(log_msg)}"
-        download = f"{URL}/download/{str(log_msg.id)}/{quote_plus(get_name(log_msg))}?hash={get_hash(log_msg)}"
+        watch = f"{URL}/watch/{log_msg.id}?hash={get_hash(log_msg)}"
+        stream = f"{URL}/{log_msg.id}?hash={get_hash(log_msg)}"
+        download = f"{URL}/download/{log_msg.id}?hash={get_hash(log_msg)}"
     else:
+        watch = await get_shortlink(
+            f"{URL}/watch/{log_msg.id}?hash={get_hash(log_msg)}"
+        )
         stream = await get_shortlink(
-            f"{URL}/watch/{str(log_msg.id)}/{quote_plus(get_name(log_msg))}?hash={get_hash(log_msg)}"
+            f"{URL}/{log_msg.id}?hash={get_hash(log_msg)}"
         )
         download = await get_shortlink(
-            f"{URL}/download/{str(log_msg.id)}/{quote_plus(get_name(log_msg))}?hash={get_hash(log_msg)}"
+            f"{URL}/download/{log_msg.id}?hash={get_hash(log_msg)}"
         )
+
 
     # Log message
     await log_msg.reply_text(

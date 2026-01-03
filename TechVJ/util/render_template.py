@@ -36,7 +36,7 @@ async def render_page(id, secure_hash):
         # STREAM URL (IMPORTANT)
         file_url = urllib.parse.urljoin(
             URL,
-            f"{id}?hash={secure_hash}"
+            f"stream/{id}?hash={secure_hash}"
         )
          
         template_file = "TechVJ/template/req.html"
@@ -70,4 +70,5 @@ async def render_page(id, secure_hash):
         file_size=file_size,
         file_unique_id=file_data.unique_id,
     )
+
 

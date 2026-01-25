@@ -11,9 +11,17 @@ from TechVJ.bot import multi_clients, work_loads
 from TechVJ.server.exceptions import FIleNotFound, InvalidHash
 from TechVJ.util.custom_dl import ByteStreamer
 from TechVJ.util.render_template import render_page
+from TechVJ.server.stream import stream_handler
+
 
 routes = web.RouteTableDef()
 class_cache = {}
+
+@routes.get(r"/stream/{id:\d+}", allow_head=True)
+async def stream_route(request: web.Request):
+    id = int(request.match_info["id"])
+    secure_hash = request.rel_url.query.get("hash")
+    return await media_streamer(request, id, secure_hash, inline=True)
 
 # ---------------- ROOT (Health Check) ----------------
 @routes.get("/", allow_head=True)
@@ -38,7 +46,9 @@ async def watch_page(request: web.Request):
 
 
 # ---------------- DIRECT STREAM (ROOT PATH – REQUIRED FOR VLC/MX) ----------------
-@routes.get(r"/{path:\S+}", allow_head=True)
+# @routes.get(r"/{path:\S+}", allow_head=True)
+@routes.get(r"/file/{path:\S+}", allow_head=True)
+
 async def direct_stream_handler(request: web.Request):
     try:
         path = request.match_info["path"]
@@ -171,5 +181,6 @@ async def media_streamer(
 
     await response.write_eof()
     return response
+
 
 

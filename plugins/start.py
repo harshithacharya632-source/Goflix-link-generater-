@@ -21,7 +21,10 @@ from utils import temp, get_shortlink
 async def start(client, message):
 
     if not await db.is_user_exist(message.from_user.id):
-        await db.add_user(message.from_user.id, message.from_user.first_name)
+        await db.add_user(
+            message.from_user.id,
+            message.from_user.first_name
+        )
         await client.send_message(
             LOG_CHANNEL,
             script.LOG_TEXT_P.format(
@@ -31,7 +34,19 @@ async def start(client, message):
         )
 
     rm = InlineKeyboardMarkup(
-        [[InlineKeyboardButton("✨ Update Channel", url="https://t.me/trendi_Backup")]]
+        [
+            [InlineKeyboardButton("✨ Update Channel", url="https://t.me/trendi_Backup")]
+        ]
+    )
+
+    await message.reply_text(
+        text=(
+            "👋 **Welcome!**\n\n"
+            "🎬 Stream movies & series easily.\n"
+            "⚡ Fast speed | 🛠 Admin support\n\n"
+            "Click below to stay updated 👇"
+        ),
+        reply_markup=rm
     )
 
     await client.send_message(

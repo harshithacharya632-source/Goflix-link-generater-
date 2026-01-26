@@ -17,36 +17,29 @@ from utils import temp, get_shortlink
 # =========================
 # START COMMAND
 # =========================
-@Client.on_message(filters.command("start") & filters.incoming)
+@Client.on_message(filters.command("start") & filters.private)
 async def start(client, message):
-
-    if not await db.is_user_exist(message.from_user.id):
-        await db.add_user(
-            message.from_user.id,
-            message.from_user.first_name
-        )
-        await client.send_message(
-            LOG_CHANNEL,
-            script.LOG_TEXT_P.format(
+    try:
+        if not await db.is_user_exist(message.from_user.id):
+            await db.add_user(
                 message.from_user.id,
-                message.from_user.mention
+                message.from_user.first_name
             )
-        )
-
-    rm = InlineKeyboardMarkup(
-        [
-            [InlineKeyboardButton("✨ Update Channel", url="https://t.me/trendi_Backup")]
-        ]
-    )
+            await client.send_message(
+                LOG_CHANNEL,
+                script.LOG_TEXT_P.format(
+                    message.from_user.id,
+                    message.from_user.mention
+                )
+            )
+    except Exception as e:
+        print("Start DB error:", e)
 
     await message.reply_text(
-        text=(
-            "👋 **Welcome!**\n\n"
-            "🎬 Stream movies & series easily.\n"
-            "⚡ Fast speed | 🛠 Admin support\n\n"
-            "Click below to stay updated 👇"
-        ),
-        reply_markup=rm
+        "👋 Welcome!\nClick below to stay updated 👇",
+        reply_markup=InlineKeyboardMarkup(
+            [[InlineKeyboardButton("✨ Update Channel", url="https://t.me/trendi_Backup")]]
+        )
     )
 
     await client.send_message(

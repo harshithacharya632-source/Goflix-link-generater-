@@ -19,29 +19,17 @@ from utils import temp, get_shortlink
 # =========================
 @Client.on_message(filters.command("start") & filters.private)
 async def start(client, message):
-    try:
-        if not await db.is_user_exist(message.from_user.id):
-            await db.add_user(
-                message.from_user.id,
-                message.from_user.first_name
-            )
-            await client.send_message(
-                LOG_CHANNEL,
-                script.LOG_TEXT_P.format(
-                    message.from_user.id,
-                    message.from_user.mention
-                )
-            )
-    except Exception as e:
-        print("Start DB error:", e)
-
     await message.reply_text(
-        "👋 Welcome!\nClick below to stay updated 👇",
+        "👋 Welcome to Stream Bot!\n\n"
+        "🎬 Stream movies & series instantly\n"
+        "⚡ Fast & smooth streaming\n"
+        "📥 No waiting, no limits\n"
+        "🛠 Admin support available\n\n"
+        "Click below to stay updated 👇",
         reply_markup=InlineKeyboardMarkup(
             [[InlineKeyboardButton("✨ Update Channel", url="https://t.me/trendi_Backup")]]
         )
     )
-
     await client.send_message(
         chat_id=message.from_user.id,
         text=script.START_TXT.format(

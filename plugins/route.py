@@ -1,5 +1,3 @@
-
-
 import re
 import math
 import logging
@@ -13,11 +11,8 @@ from TechVJ.util.custom_dl import ByteStreamer
 from TechVJ.util.render_template import render_page
 
 
-
 routes = web.RouteTableDef()
 class_cache = {}
-
-
 
 # ---------------- ROOT (Health Check) ----------------
 @routes.get("/", allow_head=True)
@@ -41,14 +36,16 @@ async def watch_page(request: web.Request):
         raise web.HTTPNotFound()
 
 
-# ---------------- DIRECT STREAM (ROOT PATH – REQUIRED FOR VLC/MX) ----------------#
+# ---------------- DIRECT STREAM (ROOT PATH) ----------------
 @routes.get(r"/{path:\S+}", allow_head=True)
 async def direct_stream_handler(request: web.Request):
     try:
         path = request.match_info["path"]
         id = int(re.search(r"(\d+)", path).group(1))
         secure_hash = request.rel_url.query.get("hash")
+
         return await media_streamer(request, id, secure_hash, inline=True)
+
     except InvalidHash:
         raise web.HTTPForbidden()
     except FIleNotFound:
@@ -65,7 +62,9 @@ async def download_handler(request: web.Request):
         path = request.match_info["path"]
         id = int(re.search(r"(\d+)", path).group(1))
         secure_hash = request.rel_url.query.get("hash")
+
         return await media_streamer(request, id, secure_hash, inline=False)
+
     except InvalidHash:
         raise web.HTTPForbidden()
     except FIleNotFound:
@@ -82,7 +81,7 @@ async def media_streamer(
     secure_hash: str,
     inline: bool
 ):
-    range_header = request.headers.get("Range", None)
+    range_header = request.headers.get("Range")
 
     # pick least-loaded client
     index = min(work_loads, key=work_loads.get)
@@ -101,21 +100,18 @@ async def media_streamer(
     file_size = file_id.file_size
     file_name = file_id.file_name or "file.bin"
 
-    # ---------------- RANGE PARSING (SAFE) ----------------
+    # ---------------- RANGE PARSING ----------------
     if range_header:
         match = re.match(r"bytes=(\d+)-(\d*)", range_header)
         if match:
             start = int(match.group(1))
             end = int(match.group(2)) if match.group(2) else file_size - 1
-            status = 206
         else:
             start = 0
             end = file_size - 1
-            status = 200
     else:
         start = 0
         end = file_size - 1
-        status = 200
 
     if start < 0 or end >= file_size or start > end:
         return web.Response(
@@ -129,35 +125,42 @@ async def media_streamer(
     first_cut = start - offset
     last_cut = end % chunk_size + 1
     part_count = math.ceil((end + 1) / chunk_size) - math.floor(offset / chunk_size)
-    length = end - start + 1
 
-    # ---------------- MIME FIX (CRITICAL FOR VLC/MX) ----------------
-    mime = file_id.mime_type
-    if not mime or mime == "application/octet-stream":
-        if file_name.lower().endswith(".mp4"):
-            mime = "video/mp4"
-        elif file_name.lower().endswith(".mkv"):
-            mime = "video/x-matroska"
-        elif file_name.lower().endswith(".avi"):
-            mime = "video/x-msvideo"
-        else:
-            mime = "application/octet-stream"
+    # ---------------- MIME FIX ----------------
+    mime = file_id.mime_type or "application/octet-stream"
+
+    if file_name.lower().endswith(".mp4"):
+        mime = "video/mp4"
+    elif file_name.lower().endswith(".mkv"):
+        mime = "video/x-matroska"
+    elif file_name.lower().endswith(".avi"):
+        mime = "video/x-msvideo"
+
+    # ---------------- KOYEB + BROWSER SAFE RESPONSE ----------------
+    headers = {
+        "Content-Type": mime,
+        "Content-Range": f"bytes {start}-{end}/{file_size}",
+        "Accept-Ranges": "bytes",
+        "Content-Disposition": (
+            f'inline; filename="{file_name}"'
+            if inline else
+            f'attachment; filename="{file_name}"'
+        ),
+
+        # 🔥 CRITICAL FOR KOYEB / ENVOY
+        "Cache-Control": "no-cache, no-store, must-revalidate",
+        "Pragma": "no-cache",
+        "Expires": "0",
+        "X-Accel-Buffering": "no",
+
+        # 🔥 REQUIRED FOR HTML5 VIDEO
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Headers": "Range",
+    }
 
     response = web.StreamResponse(
-        status=status,
-        headers={
-            "Content-Type": mime,
-            "Content-Length": str(length),
-            "Content-Range": f"bytes {start}-{end}/{file_size}",
-            "Accept-Ranges": "bytes",
-            "Content-Disposition": (
-                f'inline; filename="{file_name}"'
-                if inline else
-                f'attachment; filename="{file_name}"'
-            ),
-            "Cache-Control": "no-store",
-            "Connection": "keep-alive",
-        }
+        status=206,   # 🔥 ALWAYS 206 FOR BROWSER
+        headers=headers
     )
 
     await response.prepare(request)
@@ -175,7 +178,3 @@ async def media_streamer(
 
     await response.write_eof()
     return response
-
-
-
-
